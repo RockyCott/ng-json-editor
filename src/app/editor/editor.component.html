@@ -1,1 +1,67 @@
-<div #editor class="app-ace-editor"></div>
+<div *ngIf="false" class="json-error">
+  {{ jsonErrorDetails }}
+</div>
+<div class="content">
+  <!-- OPTION MENU HEADER -->
+  <div class="option-menu" [ngStyle]="customStyles">
+    <!-- Arreglar apariencia JSON Option -->
+    <div class="cursor-pointer grid-center" (click)="prettifyJson_()" title="Ordenar">
+      <span class="material-icons size-option-menu-icon">sort</span>
+    </div>
+    <!-- Change Theme Option -->
+    <div
+      class="change-mode cursor-pointer grid-center"
+      (click)="changeDarkMode_()"
+      [title]="'Cambiar a tema ' + (darkMode ? 'claro' : 'oscuro')"
+    >
+      <span class="material-icons size-option-menu-icon" *ngIf="darkMode"> light_mode </span>
+      <span class="material-icons size-option-menu-icon" *ngIf="!darkMode">dark_mode</span>
+    </div>
+    <!-- Copy COntent Option -->
+    <div class="cursor-pointer grid-center" (click)="copyContent_()" title="Copiar">
+      <span class="material-icons size-option-menu-icon">content_copy</span>
+    </div>
+    <!-- Json Repair Option -->
+    <div class="cursor-pointer grid-center" (click)="repairJson_()" title="Reparar">
+      <span class="material-icons size-option-menu-icon">build</span>
+    </div>
+    <!-- Download Option -->
+    <div class="cursor-pointer grid-center" (click)="downloadJson_()" title="Descargar">
+      <span class="material-icons size-option-menu-icon">download</span>
+    </div>
+  </div>
+  <div #editor class="app-ace-editor ace-dracula"></div>
+  <div
+    class="jse-status-bar svelte-hhcn0f"
+    [ngClass]="{
+      'bg-dark': darkMode,
+      'bg-light': !darkMode
+    }"
+  >
+    <div
+      class="jse-status-bar-info svelte-hhcn0f margin-l8"
+      [ngClass]="{
+        'color-bg-dark': darkMode,
+        'color-bg-light': !darkMode
+      }"
+    >
+      Line: {{ currentPositionCursor.row + 1 }}
+    </div>
+    <div
+      class="jse-status-bar-info svelte-hhcn0f"
+      [ngClass]="{
+        'color-bg-dark': darkMode,
+        'color-bg-light': !darkMode
+      }"
+    >
+      Column: {{ currentPositionCursor.column + 1 }}
+    </div>
+    <div
+      *ngIf="inError"
+      style="margin-left: auto; display: grid; place-items: center"
+      (click)="setErrorPosition_()"
+    >
+      <span class="material-icons error-icon">error</span>
+    </div>
+  </div>
+</div>

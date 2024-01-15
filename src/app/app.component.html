@@ -1,2 +1,8 @@
-<button type="button" (click)="imprimir()">prueba</button>
-<app-editor [(text)]="jsonInputData" mode="json"></app-editor>
+<div style="height: 100vh">
+  <app-editor
+    [(text)]="jsonInputData"
+    mode="json"
+    [darkMode]="true"
+    [customStyles]="customStyles"
+  ></app-editor>
+</div>
