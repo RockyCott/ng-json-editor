@@ -1,11 +1,16 @@
 <div *ngIf="false" class="json-error">
   {{ jsonErrorDetails }}
 </div>
+
 <div class="content">
   <!-- OPTION MENU HEADER -->
-  <div class="option-menu" [ngStyle]="customStyles">
+  <div class="option-menu" [ngStyle]="customStyles" *ngIf="showToolbar">
     <!-- Arreglar apariencia JSON Option -->
-    <div class="cursor-pointer grid-center" (click)="prettifyJson_()" title="Ordenar">
+    <div
+      class="cursor-pointer grid-center rotate-180 mirror-x"
+      (click)="prettifyJson_()"
+      title="Ordenar"
+    >
       <span class="material-icons size-option-menu-icon">sort</span>
     </div>
     <!-- Change Theme Option -->
@@ -14,20 +19,83 @@
       (click)="changeDarkMode_()"
       [title]="'Cambiar a tema ' + (darkMode ? 'claro' : 'oscuro')"
     >
-      <span class="material-icons size-option-menu-icon" *ngIf="darkMode"> light_mode </span>
-      <span class="material-icons size-option-menu-icon" *ngIf="!darkMode">dark_mode</span>
+      <span class="material-icons size-option-menu-icon" *ngIf="darkMode">
+        light_mode
+      </span>
+      <span class="material-icons size-option-menu-icon" *ngIf="!darkMode"
+        >dark_mode</span
+      >
     </div>
     <!-- Copy COntent Option -->
-    <div class="cursor-pointer grid-center" (click)="copyContent_()" title="Copiar">
+    <div
+      class="cursor-pointer grid-center"
+      (click)="copyContent_()"
+      title="Copiar"
+    >
       <span class="material-icons size-option-menu-icon">content_copy</span>
     </div>
     <!-- Json Repair Option -->
-    <div class="cursor-pointer grid-center" (click)="repairJson_()" title="Reparar">
+    <div
+      class="cursor-pointer grid-center"
+      (click)="repairJson_()"
+      title="Reparar"
+    >
       <span class="material-icons size-option-menu-icon">build</span>
     </div>
     <!-- Download Option -->
-    <div class="cursor-pointer grid-center" (click)="downloadJson_()" title="Descargar">
+    <div
+      class="cursor-pointer grid-center"
+      (click)="downloadJson_()"
+      title="Descargar"
+    >
       <span class="material-icons size-option-menu-icon">download</span>
+    </div>
+    <!-- Incrementar letra -->
+    <button
+      type="button"
+      class="cursor-pointer grid-center"
+      (click)="increaseFontSize_()"
+      title="Aumentar tamaño de letra"
+      style="background: none; border: none; width: auto; padding: 0"
+    >
+      <span class="material-icons"> text_increase </span>
+    </button>
+    <!-- current font size -->
+    <div
+      class="grid-center"
+      title="Tamaño de letra actual"
+      style="
+        border: 1px solid grey;
+        border-radius: 25px;
+        padding: 0 10px;
+        height: 24px;
+      "
+    >
+      <span class="font-size" style="font-size: 16px">{{ fontSize }}px</span>
+    </div>
+    <!-- Decrementar letra -->
+    <button
+      type="button"
+      class="grid-center"
+      (click)="decreaseFontSize_()"
+      title="Disminuir tamaño de letra"
+      style="background: none; border: none; width: auto; padding: 0"
+      [ngClass]="{
+        'cursor-pointer': fontSize > 1,
+      }"
+      [disabled]="fontSize <= 1"
+    >
+      <span class="material-icons"> text_decrease </span>
+    </button>
+    <!-- Search Input -->
+    <div class="search__container">
+      <input
+        class="search__input"
+        type="text"
+        placeholder="Search..."
+        [(ngModel)]="searchText"
+        (ngModelChange)="searchTextChange_($event)"
+      />
     </div>
   </div>
   <div #editor class="app-ace-editor ace-dracula"></div>
@@ -56,12 +124,35 @@
     >
       Column: {{ currentPositionCursor.column + 1 }}
     </div>
+
     <div
       *ngIf="inError"
-      style="margin-left: auto; display: grid; place-items: center"
-      (click)="setErrorPosition_()"
+      style="
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-direction: row;
+      "
     >
-      <span class="material-icons error-icon">error</span>
+      <span
+        *ngIf="inError"
+        class="material-icons error-icon"
+        (click)="setErrorPosition_()"
+        title="Ir al error"
+        >error</span
+      >
+      <span
+        *ngIf="readOnly"
+        class="material-icons info-icon"
+        title="Solo de lectura"
+        [ngClass]="{
+          'color-bg-dark': darkMode,
+          'color-bg-light': !darkMode
+        }"
+        >lock</span
+      >
     </div>
+    <!-- ReadOnly text -->
   </div>
 </div>

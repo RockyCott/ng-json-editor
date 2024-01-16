@@ -42,4 +42,10 @@ export class AppComponent {
   customStyles: { [key: string]: string } = {
     'font-size': '12px',
   };
+
+  readOnly = false;
+
+  changeReadOnly() {
+    this.readOnly = !this.readOnly;
+  }
 }

@@ -12,8 +12,11 @@ Este proyecto es un editor de JSON construido con Angular utilizando la librerí
 
 ## Capturas de Pantalla
 
-![Captura de Pantalla 1](link-to-screenshot-1)
-![Captura de Pantalla 2](link-to-screenshot-2)
+![Captura de Pantalla 1](./src/assets/captura1.png)
+![Captura de Pantalla 2](./src/assets/captura2.png)
+![Captura de Pantalla 3](./src/assets/captura3.png)
+![Captura de Pantalla 4](./src/assets/captura4.png)
+![Captura de Pantalla 5](./src/assets/captura5.png)
 
 ## Development server
 

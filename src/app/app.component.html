@@ -1,8 +1,9 @@
-<div style="height: 100vh">
-  <app-editor
+<div style="height: 80vh">
+  <app-json-editor
     [(text)]="jsonInputData"
     mode="json"
     [darkMode]="true"
     [customStyles]="customStyles"
-  ></app-editor>
+    [readOnly]="readOnly"
+  ></app-json-editor>
 </div>

@@ -25,33 +25,56 @@ import 'ace-builds/src-noconflict/theme-dracula';
 import * as jsonlint from 'jsonlint';
 
 import { jsonrepair } from 'jsonrepair';
+/**
+ * Represents the EditorComponent class which is responsible for managing the JSON editor.
+ * This component provides functionalities for editing, validating, and prettifying JSON content.
+ */
 @Component({
-  selector: 'app-editor',
+  selector: 'app-json-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss'],
 })
-export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class EditorComponent
+  implements OnInit, AfterViewInit, OnChanges, OnDestroy
+{
+  /**
+   * Reference to the editor element.
+   */
   @ViewChild('editor') private editorRef!: ElementRef<HTMLElement>;
-  @Output() textChange = new EventEmitter<string>();
+  /**
+   * Emits an event when the text value changes.
+   * @event textChange
+   * @type {EventEmitter<string>}
+   */
+  @Output() private textChange = new EventEmitter<string>();
+  /**
+   * The input text for the editor component.
+   */
   @Input() public text!: string;
+  /**
+   * Indicates whether the editor is in read-only mode.
+   */
   @Input() public readOnly: boolean = false;
   @Input() public mode: string = 'json';
-  @Input() prettify: boolean = true;
-  @Input() darkMode: boolean = false;
+  @Input() public darkMode: boolean = false;
   @Input() customStyles: { [key: string]: string } = {};
+  @Input() showToolbar: boolean = true;
   protected showErrors: boolean = true;
   /**
    * Emits an event when the validation state changes.
-   * 
+   *
    * @event validationChange
    * @type {EventEmitter<{ valid: boolean; error: any; }>}
    */
-  @Output() validationChange: EventEmitter<{ valid: boolean; error: any; }> = new EventEmitter<{
-    valid: boolean;
-    error: any;
-  }>();
+  @Output() validationChange: EventEmitter<{ valid: boolean; error: any }> =
+    new EventEmitter<{
+      valid: boolean;
+      error: any;
+    }>();
 
   editor!: Ace.Editor;
+
+  fontSize: number = 14;
 
   // All possible options can be found at:
   // https://github.com/ajaxorg/ace/wiki/Configuring-Ace
@@ -59,7 +82,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDest
     showPrintMargin: false,
     tabSize: 2,
     wrap: true,
-    fontSize: 14,
+    fontSize: this.fontSize,
     fontFamily: "'Roboto Mono Regular', monospace",
   };
 
@@ -67,12 +90,17 @@ export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDest
 
   protected jsonErrorDetails: string = '';
 
-  protected errorPosition: { row: any; column: any } = { row: null, column: null };
+  protected errorPosition: { row: any; column: any } = {
+    row: null,
+    column: null,
+  };
 
   protected currentPositionCursor: { row: number; column: number } = {
     row: 0,
     column: 0,
   };
+
+  searchText: string = '';
 
   constructor(private cdr: ChangeDetectorRef) {
     // nothing
@@ -107,6 +135,9 @@ export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDest
           case 'mode':
             this.onEditorModeChange_();
             break;
+          case 'readOnly':
+            this.editor.setReadOnly(this.readOnly);
+            break;
           default:
         }
       }
@@ -118,7 +149,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDest
     this.editor.setOptions(this.options);
     this.editor.setValue(this.text, -1);
     this.editor.setReadOnly(this.readOnly);
-    this.changeEditorTheme_(this.darkMode ? 'dracula': 'tomorrow');
+    this.changeEditorTheme_(this.darkMode ? 'dracula' : 'tomorrow');
     this.setEditorMode_();
     this.editor.setOption('fadeFoldWidgets', true);
     this.editor.on('change', () => this.onEditorTextChange_());
@@ -265,7 +296,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDest
    */
   protected changeDarkMode_(): void {
     this.darkMode = !this.darkMode;
-    this.changeEditorTheme_(this.darkMode ? 'dracula': 'tomorrow');
+    this.changeEditorTheme_(this.darkMode ? 'dracula' : 'tomorrow');
   }
 
   /**
@@ -293,7 +324,77 @@ export class EditorComponent implements OnInit, AfterViewInit, OnChanges, OnDest
     editor.gotoLine(row, column, true);
   }
 
+  onFocus_(): void {
+    const searchBox = document.querySelector('.search-box');
+    const searchIcon = document.querySelector('.search-icon');
+    searchBox?.classList.add('border-searching');
+    searchIcon?.classList.add('si-rotate');
+  }
+
+  onBlur_(): void {
+    const searchBox = document.querySelector('.search-box');
+    const searchIcon = document.querySelector('.search-icon');
+    searchBox?.classList.remove('border-searching');
+    searchIcon?.classList.remove('si-rotate');
+  }
+
+  onKeyUp_(text: any): void {
+    const goIcon = document.querySelector('.go-icon');
+    if (text?.length) {
+      goIcon?.classList.add('go-in');
+    } else {
+      goIcon?.classList.remove('go-in');
+    }
+  }
+
   public get inErrorState(): boolean {
     return this.inError;
+  }
+
+  searchTextChange_(text: string): void {
+    if (text.length === 0) {
+      this.editor.find(text);
+      return;
+    }
+    this.editor.find(text, {
+      backwards: false,
+      wrap: true,
+      caseSensitive: false,
+      wholeWord: false,
+      regExp: false,
+    });
+  }
+
+  uploadFile_(event: any): void {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result;
+      this.text = text as string;
+      this.onTextChange_(this.text);
+      this.prettifyJson_();
+    };
+    reader.readAsText(file);
+  }
+
+  increaseFontSize_(): void {
+    this.options.fontSize += 1;
+    this.fontSize = this.options.fontSize;
+    this.editor.setOptions(this.options);
+  }
+
+  decreaseFontSize_(): void {
+    if (this.fontSize <= 1) {
+      return;
+    }
+    this.options.fontSize -= 1;
+    this.fontSize = this.options.fontSize;
+    this.editor.setOptions(this.options);
+  }
+
+  resetFontSize_(): void {
+    this.options.fontSize = 14;
+    this.fontSize = this.options.fontSize;
+    this.editor.setOptions(this.options);
   }
 }
